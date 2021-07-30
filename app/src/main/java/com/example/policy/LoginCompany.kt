@@ -11,4 +11,3 @@ class LoginCompany : AppCompatActivity()
         setContentView(R.layout.login_company)
     }
 }
-}

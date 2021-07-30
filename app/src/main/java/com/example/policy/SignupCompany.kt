@@ -10,4 +10,5 @@ class SignupCompany : AppCompatActivity()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.signup_company)
     }
+
 }

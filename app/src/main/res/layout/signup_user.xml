@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Enter your email"
+        android:hint="Enter user email"
         android:inputType="textEmailAddress" />
 
     <EditText
@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Enter your password"
+        android:hint="Enter user password"
         android:inputType="textPassword" />
 
     <EditText
@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Enter your name"
+        android:hint="Enter user name"
         android:inputType="textPersonName"/>
 
     <EditText
@@ -33,7 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Enter your phone number"
+        android:hint="Enter user phone number"
         android:inputType="phone" />
 
     <Button
