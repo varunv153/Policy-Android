@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Policy</string>
+    <string name="button1">Signup Upser</string>
+    <string name="Button2">Signup Company</string>
+    <string name="Button3">Login</string>
+    <string name="nameTextBox">Name</string>
+</resources>
