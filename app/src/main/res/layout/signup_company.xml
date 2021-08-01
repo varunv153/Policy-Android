@@ -33,7 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Sign Up"
-        android:onClick="createUser"/>
+        android:onClick="createCompany"/>
 
     <TextView
         android:id="@+id/displayInfo"
