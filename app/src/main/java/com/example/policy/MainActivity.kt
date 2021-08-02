@@ -1,15 +1,17 @@
 package com.example.policy
 
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.view.ViewGroup
+import android.widget.*
+import android.widget.AdapterView.OnItemClickListener
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.*
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -17,15 +19,46 @@ import org.json.JSONObject
 import java.net.CookieHandler
 import java.net.CookieManager
 
-
+class MyAdapter(@get:JvmName("getAdapterContext") var context: Context,
+                var rCompanies: Array<String>, var rSumInsured: Array<String>,
+                var rPremium: Array<String>) : ArrayAdapter<String>(context,  R.layout.row, R.id.textview1, rCompanies)
+{
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View
+    {
+        val layoutInflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val row = layoutInflater.inflate(R.layout.row, parent, false)
+        val myCompany = row.findViewById<TextView>(R.id.textview1)
+        val mySI = row.findViewById<TextView>(R.id.textview2)
+        val myPremium = row.findViewById<TextView>(R.id.textview3)
+        
+        myCompany.setText(rCompanies.get(position))
+        mySI.setText(rSumInsured.get(position))
+        myPremium.setText(rPremium.get(position))
+        return row
+    }
+}
 class MainActivity : AppCompatActivity()
 {
+    fun createListView()
+    {
+        var mCompanies = arrayOf("Algorithms", "Data Structures", "Languages", "Interview Corner")
+        var mSumInsured = arrayOf("300", "400", "500", "600")
+        var mPremium = arrayOf("3", "4", "5", "6")
+        val listView = findViewById<ListView>(R.id.listView)
+        val adapter = MyAdapter(this, mCompanies, mSumInsured, mPremium)
+        listView.setAdapter(adapter)
+        listView.setOnItemClickListener(OnItemClickListener { parent, view, position, id ->
+            Toast.makeText(this@MainActivity, position.toString(), Toast.LENGTH_SHORT).show()
+        })
+    }
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         CookieHandler.setDefault(CookieManager())
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.view_policies)
+        createListView()
     }
+
 
     fun renderSignupUser(view: View)
     {
