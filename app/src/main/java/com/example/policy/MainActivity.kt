@@ -14,14 +14,16 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import java.net.CookieHandler
+import java.net.CookieManager
 
 
 class MainActivity : AppCompatActivity()
 {
-    var jwtCookie = "";
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
+        CookieHandler.setDefault(CookieManager())
         setContentView(R.layout.activity_main)
     }
 
@@ -126,7 +128,7 @@ class MainActivity : AppCompatActivity()
     fun sendPostRequest(url:String, reqObject:JSONObject, view: Int)
     {
         val queue = Volley.newRequestQueue(this)
-        val req = object : JsonObjectRequest(Method.POST, url, reqObject,
+        val req = JsonObjectRequest(Request.Method.POST, url, reqObject,
             { response ->
                 res = response.toString()
                 setContentView(view)
@@ -134,29 +136,13 @@ class MainActivity : AppCompatActivity()
             { error ->
                 res = "Error"+parseVolleyError(error)
             }
-        ){
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String>? {
-                val params: MutableMap<String, String> = HashMap()
-                params["Content-Type"] = "application/json; charset=UTF-8"
-                params["jwt"] = jwtCookie
-                return params
-            }
-            override fun parseNetworkResponse(response: NetworkResponse): Response<JSONObject>? {
-                Log.i("response", response.headers.toString())
-                val responseHeaders = response.headers
-                val rawCookies = responseHeaders!!["Set-Cookie"]
-                jwtCookie = rawCookies!!
-                Log.i("cookies", jwtCookie)
-                return super.parseNetworkResponse(response)
-            }
-        }
+        )
         queue.add(req)
     }
     fun sendGetRequest(url:String, view: Int)
     {
         val queue = Volley.newRequestQueue(this)
-        val req = object: JsonObjectRequest(Method.GET, url, null,
+        val req = JsonObjectRequest(Request.Method.GET, url, null,
             { response ->
                 res = response.toString()
                 setContentView(view)
@@ -164,22 +150,7 @@ class MainActivity : AppCompatActivity()
             { error ->
                 res = "Error"+parseVolleyError(error)
             }
-        ) {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String>? {
-                val params: MutableMap<String, String> = HashMap()
-                params["Content-Type"] = "application/json; charset=UTF-8"
-                params["jwt"] = jwtCookie
-                return params
-            }
-            override fun parseNetworkResponse(response: NetworkResponse): Response<JSONObject>? {
-                val responseHeaders = response.headers
-                val rawCookies = responseHeaders!!["Set-Cookie"]
-                jwtCookie = rawCookies!!
-                Log.i("cookies", jwtCookie)
-                return super.parseNetworkResponse(response)
-            }
-        }
+        )
         queue.add(req)
     }
     fun processResponse(displayInfo: TextView)
