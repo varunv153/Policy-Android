@@ -1,47 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
     <EditText
-        android:id="@+id/signupEmail"
+        android:id="@+id/policyWording"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Enter user email"
-        android:inputType="textEmailAddress" />
+        android:hint="Enter policy wording" />
 
     <EditText
-        android:id="@+id/signupPassword"
+        android:id="@+id/roomRentCap"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Enter user password"
-        android:inputType="textPassword" />
+        android:hint="Enter room rent cap"
+        android:inputType="number"/>
 
     <EditText
-        android:id="@+id/signupName"
+        android:id="@+id/sumInsured"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Enter user name"
-        android:inputType="textPersonName"/>
+        android:hint="Enter sum insured"
+        android:inputType="number"/>
 
     <EditText
-        android:id="@+id/signupPhone"
+        android:id="@+id/exemptions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Enter user phone number"
-        android:inputType="phone" />
+        android:hint="Enter claim exemptions"/>
+
+    <EditText
+        android:id="@+id/csr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Enter claim settlement ratio"
+        android:inputType="number"/>
+
 
     <Button
         android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sign Up"
-        android:onClick="createUser" />
+        android:text="Create Policy"
+        android:onClick="createPolicy" />
 
     <TextView
         android:id="@+id/displayInfo"

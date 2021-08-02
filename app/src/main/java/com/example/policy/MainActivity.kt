@@ -1,29 +1,30 @@
 package com.example.policy
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.android.volley.Request
-import com.android.volley.VolleyError
+import com.android.volley.*
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.json.JSONObject
-import kotlinx.coroutines.*
 
 
 class MainActivity : AppCompatActivity()
 {
+    var jwtCookie = "";
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
     }
-    fun renderMainScreen(view: View)
-    {
-        setContentView(R.layout.activity_main)
-    }
+
     fun renderSignupUser(view: View)
     {
         setContentView(R.layout.signup_user)
@@ -39,6 +40,11 @@ class MainActivity : AppCompatActivity()
     fun renderLoginUser(view: View)
     {
         setContentView(R.layout.login_user)
+    }
+    //company routes
+    fun renderCreatePolicy(view: View)
+    {
+        setContentView(R.layout.create_policy)
     }
     //Routes
 
@@ -71,20 +77,35 @@ class MainActivity : AppCompatActivity()
         val email: String = findViewById<EditText>(R.id.signupEmail).text.toString()
         val password: String = findViewById<EditText>(R.id.signupPassword).text.toString()
         val name: String = findViewById<EditText>(R.id.signupName).text.toString()
-        val userDetails = JSONObject()
-        userDetails.put("email", email)
-        userDetails.put("password", password)
-        userDetails.put("name", name)
-        return userDetails
+        val companyDetails = JSONObject()
+        companyDetails.put("email", email)
+        companyDetails.put("password", password)
+        companyDetails.put("company_name", name)
+        return companyDetails
     }
     fun createCompanyJsonLogin(): JSONObject
     {
         val email: String = findViewById<EditText>(R.id.loginEmail).text.toString()
         val password: String = findViewById<EditText>(R.id.loginPassword).text.toString()
-        val userDetails = JSONObject()
-        userDetails.put("email", email)
-        userDetails.put("password", password)
-        return userDetails
+        val companyDetails = JSONObject()
+        companyDetails.put("email", email)
+        companyDetails.put("password", password)
+        return companyDetails
+    }
+    fun createPolicyJson(): JSONObject
+    {
+        val policyWording = findViewById<EditText>(R.id.policyWording).text.toString()
+        val roomRentCap = findViewById<EditText>(R.id.roomRentCap).text.toString()
+        val sumInsured = findViewById<EditText>(R.id.sumInsured).text.toString()
+        val exemptions = findViewById<EditText>(R.id.exemptions).text.toString()
+        val csr = findViewById<EditText>(R.id.csr).text.toString()
+        val policyDetails = JSONObject()
+        policyDetails.put("policywording", policyWording)
+        policyDetails.put("roomrentcap", roomRentCap)
+        policyDetails.put("suminsured", sumInsured)
+        policyDetails.put("exemptions", exemptions)
+        policyDetails.put("claim_settlement_ratio", csr)
+        return policyDetails
     }
     //Create JSON done
 
@@ -105,7 +126,7 @@ class MainActivity : AppCompatActivity()
     fun sendPostRequest(url:String, reqObject:JSONObject, view: Int)
     {
         val queue = Volley.newRequestQueue(this)
-        val req = JsonObjectRequest(Request.Method.POST, url, reqObject,
+        val req = object : JsonObjectRequest(Method.POST, url, reqObject,
             { response ->
                 res = response.toString()
                 setContentView(view)
@@ -113,16 +134,62 @@ class MainActivity : AppCompatActivity()
             { error ->
                 res = "Error"+parseVolleyError(error)
             }
-        )
+        ){
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String>? {
+                val params: MutableMap<String, String> = HashMap()
+                params["Content-Type"] = "application/json; charset=UTF-8"
+                params["jwt"] = jwtCookie
+                return params
+            }
+            override fun parseNetworkResponse(response: NetworkResponse): Response<JSONObject>? {
+                Log.i("response", response.headers.toString())
+                val responseHeaders = response.headers
+                val rawCookies = responseHeaders!!["Set-Cookie"]
+                jwtCookie = rawCookies!!
+                Log.i("cookies", jwtCookie)
+                return super.parseNetworkResponse(response)
+            }
+        }
         queue.add(req)
     }
-    fun processResponse(displayInfo: TextView, view: Int)
+    fun sendGetRequest(url:String, view: Int)
+    {
+        val queue = Volley.newRequestQueue(this)
+        val req = object: JsonObjectRequest(Method.GET, url, null,
+            { response ->
+                res = response.toString()
+                setContentView(view)
+            },
+            { error ->
+                res = "Error"+parseVolleyError(error)
+            }
+        ) {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String>? {
+                val params: MutableMap<String, String> = HashMap()
+                params["Content-Type"] = "application/json; charset=UTF-8"
+                params["jwt"] = jwtCookie
+                return params
+            }
+            override fun parseNetworkResponse(response: NetworkResponse): Response<JSONObject>? {
+                val responseHeaders = response.headers
+                val rawCookies = responseHeaders!!["Set-Cookie"]
+                jwtCookie = rawCookies!!
+                Log.i("cookies", jwtCookie)
+                return super.parseNetworkResponse(response)
+            }
+        }
+        queue.add(req)
+    }
+    fun processResponse(displayInfo: TextView)
     {
         GlobalScope.launch{
             delay(1000)
             displayInfo.text = res
         }
     }
+
     //main screen controllers
     fun createUser(view: View)
     {
@@ -130,7 +197,7 @@ class MainActivity : AppCompatActivity()
         val url = "http://localhost:3000/signup_user"
         val displayInfo = findViewById<TextView>(R.id.displayInfo)
         sendPostRequest(url, userDetails, R.layout.activity_main)
-        processResponse(displayInfo, R.layout.activity_main)
+        processResponse(displayInfo)
     }
 
     fun loginUser(view: View)
@@ -138,24 +205,48 @@ class MainActivity : AppCompatActivity()
         val userDetails = createUserJsonLogin()
         val displayInfo = findViewById<TextView>(R.id.displayInfo)
         val url = "http://localhost:3000/login_user"
-        sendPostRequest(url, userDetails, R.layout.activity_main)
-        processResponse(displayInfo, R.layout.activity_main)
+        sendPostRequest(url, userDetails,R.layout.user_screen)
+        processResponse(displayInfo)
     }
-    fun createCompany()
+    fun createCompany(view: View)
     {
-        val userDetails = createCompanyJsonSignup()
+        val companyDetails = createCompanyJsonSignup()
         val displayInfo = findViewById<TextView>(R.id.displayInfo)
         val url = "http://localhost:3000/signup_company"
-        sendPostRequest(url, userDetails, R.layout.activity_main)
-        processResponse(displayInfo, R.layout.activity_main)
+        sendPostRequest(url, companyDetails, R.layout.activity_main)
+        processResponse(displayInfo)
     }
-    fun loginCompany()
+    fun loginCompany(view: View)
     {
-        val userDetails = createCompanyJsonLogin()
+        val companyDetails = createCompanyJsonLogin()
         val displayInfo = findViewById<TextView>(R.id.displayInfo)
-        val url = "http://localhost:3000/login_user"
-        sendPostRequest(url, userDetails, R.layout.activity_main)
-        processResponse(displayInfo, R.layout.activity_main)
+        val url = "http://localhost:3000/login_company"
+        sendPostRequest(url, companyDetails, R.layout.company_screen)
+        processResponse(displayInfo)
     }
     //main screen controllers done
+
+    //company controllers
+    fun createPolicy(view: View)
+    {
+        val policyDetails = createPolicyJson()
+        val displayInfo = findViewById<TextView>(R.id.displayInfo)
+        val url = "http://localhost:3000/createpolicy"
+        sendPostRequest(url, policyDetails, R.layout.company_screen)
+        processResponse(displayInfo)
+    }
+    fun logoutCompany(view: View)
+    {
+        val url = "http://localhost:3000/logout_company"
+        sendGetRequest(url, R.layout.activity_main)
+        Toast.makeText(this, res,Toast.LENGTH_LONG).show()
+    }
+
+    //user controllers
+    fun logoutUser(view: View)
+    {
+        val url = "http://localhost:3000/logout_user"
+        sendGetRequest(url, R.layout.activity_main)
+        Toast.makeText(this, res,Toast.LENGTH_LONG).show()
+    }
 }
