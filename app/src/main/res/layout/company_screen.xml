@@ -14,19 +14,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="View my Policies"
-        android:onClick="renderViewPolicies">
+        android:onClick="renderViewPoliciesCompany">
     </Button>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="View Bonds"
-        android:onClick="renderViewBonds">
+        android:text="View Bonds">
     </Button>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="View Claims"
-        android:onClick="renderViewClaims">
+        android:onClick="renderViewClaimsCompany">
     </Button>
     <Button
         android:layout_width="match_parent"

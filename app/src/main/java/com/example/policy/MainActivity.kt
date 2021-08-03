@@ -1,49 +1,32 @@
 package com.example.policy
 
-import android.content.Context
+import MyAdapter
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.*
+import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.CookieHandler
 import java.net.CookieManager
 
-class MyAdapter(@get:JvmName("getAdapterContext") var context: Context,
-                var rCompanies: Array<String>, var rSumInsured: Array<String>,
-                var rPremium: Array<String>) : ArrayAdapter<String>(context,  R.layout.row, R.id.textview1, rCompanies)
-{
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View
-    {
-        val layoutInflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val row = layoutInflater.inflate(R.layout.row, parent, false)
-        val myCompany = row.findViewById<TextView>(R.id.textview1)
-        val mySI = row.findViewById<TextView>(R.id.textview2)
-        val myPremium = row.findViewById<TextView>(R.id.textview3)
-        
-        myCompany.setText(rCompanies.get(position))
-        mySI.setText(rSumInsured.get(position))
-        myPremium.setText(rPremium.get(position))
-        return row
-    }
-}
+
 class MainActivity : AppCompatActivity()
 {
-    fun createListView()
+    fun createListView(mCompanies:Array<String>)
     {
-        var mCompanies = arrayOf("Algorithms", "Data Structures", "Languages", "Interview Corner")
-        var mSumInsured = arrayOf("300", "400", "500", "600")
-        var mPremium = arrayOf("3", "4", "5", "6")
+        //var mCompanies = arrayOf("Algorithms", "Data Structures", "Languages", "Interview Corner")
+        var mSumInsured = Array<String>(mCompanies.size){"SI"}
+        var mPremium = Array<String>(mCompanies.size){"PR"}
         val listView = findViewById<ListView>(R.id.listView)
         val adapter = MyAdapter(this, mCompanies, mSumInsured, mPremium)
         listView.setAdapter(adapter)
@@ -55,8 +38,7 @@ class MainActivity : AppCompatActivity()
     {
         super.onCreate(savedInstanceState)
         CookieHandler.setDefault(CookieManager())
-        setContentView(R.layout.view_policies)
-        createListView()
+        setContentView(R.layout.activity_main)
     }
 
 
@@ -81,6 +63,33 @@ class MainActivity : AppCompatActivity()
     {
         setContentView(R.layout.create_policy)
     }
+    fun renderViewPoliciesCompany(view: View)
+    {
+        setContentView(R.layout.view_policies_of_company)
+        viewList("http://localhost:3000/view_policies_of_my_company",view);
+    }
+    fun renderViewClaimsCompany(view: View)
+    {
+        setContentView(R.layout.view_claims_of_company)
+        viewList("http://localhost:3000/view_claims_of_my_company",view);
+    }
+    //user routes
+    fun renderViewPolicies(view: View)
+    {
+        setContentView(R.layout.view_policies)
+        viewList("http://localhost:3000/policies",view);
+    }
+    fun renderViewMyBonds(view: View)
+    {
+        setContentView(R.layout.view_my_bonds)
+        viewList("http://localhost:3000/viewmypolicies",view);
+    }
+    fun renderViewMyClaims(view: View)
+    {
+        setContentView(R.layout.view_my_claims)
+        viewList("http://localhost:3000/viewmyclaims",view);
+    }
+
     //Routes
 
     //Create JSONS
@@ -156,7 +165,8 @@ class MainActivity : AppCompatActivity()
         }
     }
     //parsing errors done
-    var res = "E"
+    var res = "E";
+    var resJson= JSONArray()
     //controllers start
     fun sendPostRequest(url:String, reqObject:JSONObject, view: Int)
     {
@@ -172,13 +182,30 @@ class MainActivity : AppCompatActivity()
         )
         queue.add(req)
     }
-    fun sendGetRequest(url:String, view: Int)
+    fun sendGetRequest(url:String, view: Int?)
     {
         val queue = Volley.newRequestQueue(this)
         val req = JsonObjectRequest(Request.Method.GET, url, null,
             { response ->
                 res = response.toString()
-                setContentView(view)
+                if(view!=null)
+                    setContentView(view)
+            },
+            { error ->
+                res = "Error"+parseVolleyError(error)
+            }
+        )
+        queue.add(req)
+    }
+    fun sendGetRequest2(url:String, view: Int?)
+    {
+        val queue = Volley.newRequestQueue(this)
+        val req = JsonArrayRequest(Request.Method.GET, url, null,
+            { response ->
+                res = response.toString()
+                resJson = response
+                if(view!=null)
+                    setContentView(view)
             },
             { error ->
                 res = "Error"+parseVolleyError(error)
@@ -238,6 +265,18 @@ class MainActivity : AppCompatActivity()
         val url = "http://localhost:3000/createpolicy"
         sendPostRequest(url, policyDetails, R.layout.company_screen)
         processResponse(displayInfo)
+    }
+    fun viewList(url: String,view: View)
+    {
+        sendGetRequest2(url, null)
+        var length = 1
+        if(resJson.length()> length)
+            length = resJson.length()
+        var companies = Array<String>(length){"comp"}
+        for(i in 0 until resJson.length() )
+            companies[i] = resJson[i].toString()
+
+        createListView(companies)
     }
     fun logoutCompany(view: View)
     {

@@ -8,25 +8,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="View Policies"
-        android:onClick="renderSignupUser">
+        android:onClick="renderViewPolicies">
     </Button>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="View my Bonds"
-        android:onClick="renderSignupCompany">
+        android:onClick="renderViewMyBonds">
     </Button>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Create Claim"
-        android:onClick="renderLoginCompany">
+        android:text="Create Claim">
     </Button>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="View Claim Status"
-        android:onClick="renderLoginUser">
+        android:onClick="renderViewMyClaims">
     </Button>
     <Button
         android:layout_width="match_parent"
